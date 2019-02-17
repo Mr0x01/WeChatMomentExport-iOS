@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Xml;
 using WeChatMomentExport.Model;
@@ -15,7 +16,7 @@ namespace WeChatMomentExport.Utils
         public Dictionary<string, FriendInfo> friends_info = new Dictionary<string, FriendInfo>();
         public Dictionary<string, MonmentBasicInfo> moments_info = new Dictionary<string, MonmentBasicInfo>();
 
-        public void LoadMomentSQLite()
+        public void LoadMomentSQLite(string profile_hash)
         {
             string dbname = "wc005_008.db";
             var db = new SQLiteUtil(dbname);
@@ -23,8 +24,9 @@ namespace WeChatMomentExport.Utils
             HashSet<string> ids = new HashSet<string>();
             foreach (var table in tables)
             {
-                if (table.type == "table" && table.tbl_name.StartsWith("MyWC01_"))
+                if (table.type == "table" && table.tbl_name.Equals("MyWC01_" + profile_hash))
                 {
+                    Console.WriteLine($"找到{profile_hash}，开始导出...");
                     var datas = db.SelectList($"select Buffer,Id from {table.tbl_name}");
                     if (!Directory.Exists("Export"))
                     {
@@ -49,8 +51,10 @@ namespace WeChatMomentExport.Utils
                             Console.WriteLine(basic_info.content);
                         }
                     }
+                    return;
                 }
             }
+            Console.WriteLine($"未找到{profile_hash}，再次确认输入，或重建朋友圈缓存。");
         }
 
         /// <summary>
@@ -109,7 +113,16 @@ namespace WeChatMomentExport.Utils
         {
             MonmentBasicInfo info = new MonmentBasicInfo();
             XmlDocument xmlDocument = new XmlDocument();
-            xmlDocument.LoadXml(xml);
+
+            try
+            {
+                xmlDocument.LoadXml(xml);
+            }
+            catch (Exception)
+            {
+                xmlDocument.LoadXml(ReplaceHexadecimalSymbols(xml));
+            }
+
             var node_list = xmlDocument.SelectSingleNode("/plist/dict/array/dict[1]").ChildNodes;//取点赞数和发布时间
             var node = xmlDocument.SelectSingleNode("/plist");
             for (int i = 0; i < node_list.Count; i += 2)
@@ -208,6 +221,17 @@ namespace WeChatMomentExport.Utils
             }
 
             return info;
+        }
+
+        /// <summary>
+        /// 替换xml中的无效字符
+        /// </summary>
+        /// <param name="txt"></param>
+        /// <returns></returns>
+        static string ReplaceHexadecimalSymbols(string txt)
+        {
+            string r = "[\x00-\x08\x0B\x0C\x0E-\x1F\x26]";
+            return Regex.Replace(txt, r, "", RegexOptions.Compiled);
         }
     }
 }

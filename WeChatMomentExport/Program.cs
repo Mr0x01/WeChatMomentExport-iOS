@@ -12,7 +12,7 @@ namespace WeChatMomentExport
         static void Main(string[] args)
         {
             var WC = new WCUtil();
-            WC.LoadMomentSQLite();
+            WC.LoadMomentSQLite("38ea22a92ef9caa377fb0ed84c259461");
             WC.ExportAnalysis();
         }
     }
