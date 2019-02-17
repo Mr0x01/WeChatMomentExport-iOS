@@ -34,7 +34,8 @@ WC.LoadMomentSQLite("这里改成自己的Hash字符串");
 F5运行。
 
 运行后，默认会有两个文件输出：
-文件|说明
+
+文件 | 说明
 --|--
 AllMoments.txt | 自己发布过的所有朋友圈
 Report.txt|对自己朋友圈的一个简单报告
