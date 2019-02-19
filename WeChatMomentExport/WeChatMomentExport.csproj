@@ -63,6 +63,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Model\CommentInfo.cs" />
     <Compile Include="Model\FriendInfo.cs" />
     <Compile Include="Model\MonmentBasicInfo.cs" />
     <Compile Include="Model\TableInfo.cs" />
