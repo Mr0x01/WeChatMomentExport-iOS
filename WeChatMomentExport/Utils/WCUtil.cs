@@ -62,10 +62,13 @@ namespace WeChatMomentExport.Utils
         /// </summary>
         /// <param name="top_friends">点赞最多的前N个好友，默认10个</param>
         /// <param name="top_moments">被赞最多的前N个朋友圈，默认5条</param>
-        public void ExportAnalysis(int top_friends = 10, int top_moments = 5)
+        /// <param name="top_nickname_changed">前N个最爱改名的朋友，及他们的昵称，默认999</param>
+        public void ExportAnalysis(int top_friend = 10, int top_moment = 5, int top_nickname_changed = 999)
         {
-            var top10_friends = friends_info.OrderByDescending(a => a.Value.like_count).Take(top_friends).ToList();
-            var top10_moments = moments_info.OrderByDescending(a => a.Value.like_count).Take(top_moments)/*.OrderByDescending(a=>a.Value.create_time)*/.ToList();
+            var top_friends = friends_info.OrderByDescending(a => a.Value.like_count).Take(top_friend).ToList();
+            var top_moments = moments_info.OrderByDescending(a => a.Value.like_count).Take(top_moment)/*.OrderByDescending(a=>a.Value.create_time)*/.ToList();
+            var friends = friends_info.OrderByDescending(a => a.Value.nick_name.Count).Take(top_nickname_changed);
+
             string top = "";
             int total_like = 0, moments_amount = 0;
             foreach (var moment in moments_info.OrderByDescending(a => a.Value.create_time))
@@ -78,15 +81,29 @@ namespace WeChatMomentExport.Utils
 
             top = "";
             top += $"共发朋友圈：{moments_amount}\r\n共收到赞：{total_like}\r\n";
-            top += "点赞Top10\r\n";
-            foreach (var friend in top10_friends)
+            top += $"点赞Top{top_moment}\r\n";
+            foreach (var friend in top_friends)
             {
                 top += $"WXID：{""}\t\t\t\t昵称：{friend.Value.nick_name[0]}\t\t\t\t点赞：{friend.Value.like_count}\r\n";
             }
-            top += "被赞Top5\r\n";
-            foreach (var moment in top10_moments)
+            top += $"被赞Top{top_moment}\r\n\r\n";
+            foreach (var moment in top_moments)
             {
                 top += $"内容：{moment.Value.content}\r\n日期：{moment.Value.create_time}\r\n点赞：{moment.Value.like_count}\r\n\r\n";
+            }
+            top += $"改名Top{top_nickname_changed}\r\n\r\n";
+            foreach (var friend in friends)
+            {
+                top += $"WXID：[{friend.Key}]\r\n";
+                for (int i = 0; i < friend.Value.nick_name.Count; i++)
+                {
+                    top += $"[{friend.Value.nick_name[i]}]";
+                    if (i > 0 && i % 3 == 0)
+                    {
+                        top += "\r\n";
+                    }
+                }
+                top += "\r\n\r\n";
             }
             File.WriteAllText("Report.txt", top);
         }
@@ -211,6 +228,10 @@ namespace WeChatMomentExport.Utils
                             if (friends_info.ContainsKey(val))
                             {
                                 friends_info[val].like_count++;
+                                if (!friends_info[val].nick_name.Contains(node_list[i + 1].InnerText))
+                                {
+                                    friends_info[val].nick_name.Add(node_list[i + 1].InnerText);
+                                }
                             }
                             else
                             {
@@ -226,6 +247,10 @@ namespace WeChatMomentExport.Utils
                             if (friends_info.ContainsKey(val))
                             {
                                 friends_info[val].like_count++;
+                                if (!friends_info[val].nick_name.Contains(node_list[i + 1].InnerText))
+                                {
+                                    friends_info[val].nick_name.Add(node_list[i + 1].InnerText);
+                                }
                             }
                             else
                             {
