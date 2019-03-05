@@ -2,6 +2,9 @@
 WeChatMomentExport-iOS是用C#编写的朋友圈导出工具
 **(仅适用于iOS的朋友圈数据库)**
 。
+# 更新
+1. 加入了朋友圈中与你有交互的人的所有昵称导出功能。像这样👇
+![](https://raw.githubusercontent.com/Mr0x01/WeChatMomentExport-iOS/master/update1.png)
 
 # 使用说明
 ## 从手机导出微信数据库
