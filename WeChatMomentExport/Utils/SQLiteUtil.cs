@@ -11,7 +11,7 @@ namespace WeChatMomentExport.Utils
 {
     public class SQLiteUtil
     {
-        SQLiteConnection db;
+        private SQLiteConnection db;
         public SQLiteUtil(string db_name)
         {
             if (File.Exists(db_name))

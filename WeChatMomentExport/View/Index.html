@@ -1,0 +1,88 @@
+﻿<!DOCTYPE html>
+
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" />
+    <script src="static/script/data.js"></script>
+    <script src="static/script/vue.js"></script>
+    <link href="static/css/weui.css" rel="stylesheet" />
+    <link href="static/css/timeline.css" rel="stylesheet" />
+    <title>我的朋友圈</title>
+</head>
+<body>
+    <div id="moment_timeline">
+        <div class="timeline">
+            <div v-for="moment in moment_data" class="container" v-bind:class="side">
+                <div class="content">
+                    <p class="moment_text">{{moment.momentId}}</p>
+                    <p class="moment_text">{{moment.momentText}}</p>
+                    <div v-if="moment.momentType == 3 && moment.momentImgsLocal.length != 0" class="weui-grids">
+                        <div v-for="imgPath in moment.momentImgsLocal" class="weui-grid">
+                            <img class="moment_attachment" :src="imgPath" alt="">
+                        </div>
+                    </div>
+                    <div v-if="moment.momentType == 0 && moment.shortVideoUrlLocal != null" class="weui-grids">
+                        <video class="moment_attachment" :src="moment.shortVideoUrlLocal" controls="controls" preload="auto"></video>
+                    </div>
+                    <div v-if="moment.momentType == 4 && moment.sharedItem != null" class="weui-grids">
+                        <video class="moment_attachment" :src="moment.sharedItem.sharedFileLocal" controls="controls" preload="auto"></video>
+                    </div>
+                    <div class="moment_time">{{moment.momentTime}}</div>
+                    <div v-if="moment.like.length != 0">
+                        <div>♥</div>
+                        <hr />
+                        <ul>
+                            <li style="display:inline" v-for="liked in moment.like" :data-userId="liked.likedUser.userId">
+                                {{liked.likedUser.userName}}
+                            </li>
+                        </ul>
+                    </div>
+                    <div v-if="moment.comment.length != 0">
+                        <br />
+                        <div>💬</div>
+                        <hr />
+                        <ul>
+                            <li v-for="commentItem in moment.comment" :data-userId="commentItem.commentUser.userId">
+                                <div>
+                                    <span>
+                                        {{commentItem.commentUser.userName}}：
+                                    </span>
+                                    <span v-if="commentItem.commentReplyto != null && commentItem.commentReplyto != ''">
+                                        @{{commentItem.commentReplyto}}
+                                    </span>
+                                    <span>{{commentItem.commentContent}}</span>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+
+                </div>
+                {{flipSide()}}
+            </div>
+        </div>
+    </div>
+
+    <script>
+        var app = new Vue({
+            el: '#moment_timeline',
+            data: {
+                moment_data: null,
+                side: "left"
+            },
+            mounted: function () {
+                this.moment_data = window.moment_data;
+            },
+            methods: {
+                flipSide: function () {
+                    if (this.side == "left") {
+                        this.side = "right";
+                    } else {
+                        this.side = "left";
+                    }
+                }
+            }
+
+        })
+    </script>
+</body>
+</html>

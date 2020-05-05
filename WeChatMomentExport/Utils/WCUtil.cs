@@ -16,7 +16,7 @@ namespace WeChatMomentExport.Utils
         public Dictionary<string, FriendInfo> friends_info = new Dictionary<string, FriendInfo>();
         public Dictionary<string, MonmentBasicInfo> moments_info = new Dictionary<string, MonmentBasicInfo>();
 
-        public void LoadMomentSQLite(string profile_hash)
+        public void LoadMomentSQLite(string profile_hash = "")
         {
             string dbname = "wc005_008.db";
             var db = new SQLiteUtil(dbname);
@@ -98,7 +98,6 @@ namespace WeChatMomentExport.Utils
         private static string FormatPlist(string path)
         {
             var old_one = new FileInfo(path);
-            var new_one = new FileInfo(path);
             var plist = PropertyListParser.Parse(old_one);
             string xml = plist.ToXmlPropertyList();
             File.WriteAllText(old_one.DirectoryName + "\\" + old_one.Name + ".xml", xml);
@@ -230,6 +229,8 @@ namespace WeChatMomentExport.Utils
         /// <returns></returns>
         static string ReplaceHexadecimalSymbols(string txt)
         {
+            //12655080931128840365
+            return txt;
             string r = "[\x00-\x08\x0B\x0C\x0E-\x1F\x26]";
             return Regex.Replace(txt, r, "", RegexOptions.Compiled);
         }
