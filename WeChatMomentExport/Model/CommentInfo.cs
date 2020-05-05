@@ -28,6 +28,5 @@ namespace WeChatMomentExport.Model
         /// 评论的排列顺序(越大越靠后)
         /// </summary>
         public int commentOrder { get; set; }
-
     }
 }

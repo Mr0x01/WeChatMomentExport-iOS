@@ -62,15 +62,18 @@ namespace WeChatMomentExport.Utils
         /// </summary>
         /// <param name="top_friends">点赞最多的前N个好友，默认10个</param>
         /// <param name="top_moments">被赞最多的前N个朋友圈，默认5条</param>
-        public void ExportAnalysis(int top_friends = 10, int top_moments = 5)
+        /// <param name="top_nickname_changed">前N个最爱改名的朋友，及他们的昵称，默认999</param>
+        public void ExportAnalysis(int top_friend = 10, int top_moment = 5, int top_nickname_changed = 999)
         {
-            var top10_friends = friends_info.OrderByDescending(a => a.Value.like_count).Take(top_friends).ToList();
-            var top10_moments = moments_info.OrderByDescending(a => a.Value.like_count).Take(top_moments)/*.OrderByDescending(a=>a.Value.create_time)*/.ToList();
+            var top_friends = friends_info.OrderByDescending(a => a.Value.like_count).Take(top_friend).ToList();
+            var top_moments = moments_info.OrderByDescending(a => a.Value.like_count).Take(top_moment)/*.OrderByDescending(a=>a.Value.create_time)*/.ToList();
+            var friends = friends_info.OrderByDescending(a => a.Value.nick_name.Count).Take(top_nickname_changed);
+
             string top = "";
             int total_like = 0, moments_amount = 0;
             foreach (var moment in moments_info.OrderByDescending(a => a.Value.create_time))
             {
-                top += $"内容：{moment.Value.content}\r\n日期：{moment.Value.create_time}\r\n点赞：{moment.Value.like_count}\r\n\r\n";
+                top += $"编号：{moment.Key}\r\n内容：{moment.Value.content}\r\n日期：{moment.Value.create_time}\r\n点赞：{moment.Value.like_count}\r\n\r\n";
                 total_like += moment.Value.like_count;
                 moments_amount++;
             }
@@ -78,18 +81,33 @@ namespace WeChatMomentExport.Utils
 
             top = "";
             top += $"共发朋友圈：{moments_amount}\r\n共收到赞：{total_like}\r\n";
-            top += "点赞Top10\r\n";
-            foreach (var friend in top10_friends)
+            top += $"点赞Top{top_moment}\r\n";
+            foreach (var friend in top_friends)
             {
                 top += $"WXID：{""}\t\t\t\t昵称：{friend.Value.nick_name[0]}\t\t\t\t点赞：{friend.Value.like_count}\r\n";
             }
-            top += "被赞Top5\r\n";
-            foreach (var moment in top10_moments)
+            top += $"被赞Top{top_moment}\r\n\r\n";
+            foreach (var moment in top_moments)
             {
                 top += $"内容：{moment.Value.content}\r\n日期：{moment.Value.create_time}\r\n点赞：{moment.Value.like_count}\r\n\r\n";
             }
+            top += $"改名Top{top_nickname_changed}\r\n\r\n";
+            foreach (var friend in friends)
+            {
+                top += $"WXID：[{friend.Key}]\r\n";
+                for (int i = 0; i < friend.Value.nick_name.Count; i++)
+                {
+                    top += $"[{friend.Value.nick_name[i]}]";
+                    if (i > 0 && i % 3 == 0)
+                    {
+                        top += "\r\n";
+                    }
+                }
+                top += "\r\n\r\n";
+            }
             File.WriteAllText("Report.txt", top);
         }
+
         /// <summary>
         /// 格式化plist为XML
         /// </summary>
@@ -103,6 +121,7 @@ namespace WeChatMomentExport.Utils
             File.WriteAllText(old_one.DirectoryName + "\\" + old_one.Name + ".xml", xml);
             return xml;
         }
+
         /// <summary>
         /// 解析xml的内容，取出朋友圈的基础信息
         /// </summary>
@@ -132,9 +151,7 @@ namespace WeChatMomentExport.Utils
                 var val = temp_val.InnerText;
                 if (key == "createtime")
                 {
-                    DateTime converted = new DateTime(1970, 1, 1, 0, 0, 0, 0);
-                    DateTime newDateTime = converted.AddSeconds(long.Parse(val));
-                    info.create_time = newDateTime.ToLocalTime();
+                    info.create_time = TStoLocalTime(long.Parse(val));
                     continue;
                 }
                 else if (key == "realLikeCount")
@@ -144,36 +161,52 @@ namespace WeChatMomentExport.Utils
                 }
             }
 
-            node = xmlDocument.SelectSingleNode("/plist/dict/array/string[last()]");//取自己发表的内容
-            if (node.InnerText.Contains("foursquare") || node.InnerText.Contains("qqmap_") || node.InnerText.Contains("dianping"))//处理有坐标的情况
+            try
             {
-                node = xmlDocument.SelectSingleNode("/plist/dict/array/string[last()-4]");
-                info.content = node.InnerText.Trim();
-            }
-            else if (node.InnerText.EndsWith("="))
-            {
-                node = xmlDocument.SelectSingleNode("/plist/dict/array/string[last()-2]");
-                info.content = node.InnerText;
-                if (node.InnerText.Contains("http://") || node.InnerText.Contains("https://"))
+                node = xmlDocument.SelectSingleNode("/plist/dict/array//key[. = 'isForceUpdate']").ParentNode.NextSibling;//取自己发表的内容
+                if (node.Name.Equals("dict"))
                 {
-                    info.content = "";
+                    while (true)
+                    {
+                        if (node.NextSibling.Name.Equals("dict"))
+                        {
+                            info.content = node.InnerText;
+                            if (info.content.Equals("$classnameWCAppInfo$classesWCAppInfoNSObject"))
+                            {
+                                node = xmlDocument.SelectSingleNode("/plist/dict/array//key[. = 'appMsgShareInfo']").ParentNode.NextSibling;
+                                info.content = "[文章标题]" + node.InnerText;
+                            }
+                            break;
+                        }
+                        else
+                        {
+                            node = node.NextSibling;
+                        }
+                    }
+                }
+                else if (node.Name.Equals("string"))
+                {
+                    while (true)
+                    {
+                        node = node.NextSibling;
+                        if (node.Name.Equals("dict"))
+                        {
+                            info.content = node.NextSibling.InnerText;
+                            break;
+                        }
+                    }
                 }
             }
-            else if (node.InnerText.StartsWith("wx"))
+            catch (NullReferenceException)
             {
-                node = xmlDocument.SelectSingleNode("/plist/dict/array/string[last()-1]");
-                info.content = node.InnerText.Trim();
+                node = xmlDocument.SelectSingleNode("/plist/dict/array//key[. = 'bUseXorEncrypt']").ParentNode;//取自己发表的内容
+                if (node.Name.Equals("dict"))
+                {
+                    node = node.NextSibling.NextSibling;
+                    info.content = node.InnerText;
+                }
             }
-            else
-            {
-                info.content = node.InnerText.Trim();
-            }
-            node_list = xmlDocument.SelectSingleNode("/plist/dict/array/dict[2]/array").ChildNodes; //取点赞人的索引
-            int[] liked_index = new int[node_list.Count];
-            for (int i = 0; i < node_list.Count; i++)
-            {
-                liked_index[i] = Convert.ToInt32(node_list[i].InnerText, 16) + 1;
-            }
+
             node_list = xmlDocument.SelectNodes("/plist/dict/array/string");
             bool empty = false;
             if (info.like_count != 0)
@@ -194,6 +227,10 @@ namespace WeChatMomentExport.Utils
                             if (friends_info.ContainsKey(val))
                             {
                                 friends_info[val].like_count++;
+                                if (!friends_info[val].nick_name.Contains(node_list[i + 1].InnerText))
+                                {
+                                    friends_info[val].nick_name.Add(node_list[i + 1].InnerText);
+                                }
                             }
                             else
                             {
@@ -209,6 +246,10 @@ namespace WeChatMomentExport.Utils
                             if (friends_info.ContainsKey(val))
                             {
                                 friends_info[val].like_count++;
+                                if (!friends_info[val].nick_name.Contains(node_list[i + 1].InnerText))
+                                {
+                                    friends_info[val].nick_name.Add(node_list[i + 1].InnerText);
+                                }
                             }
                             else
                             {
@@ -219,6 +260,47 @@ namespace WeChatMomentExport.Utils
                 }
             }
 
+            node = xmlDocument.SelectSingleNode("/plist/dict/array//string[. = 'NSMutableArray']").ParentNode.NextSibling;
+            int comment_friends_index = node.SelectNodes("array/string").Count;
+            //if (comment_friends_index > 0)
+            //{
+            //    for (int i = 0; i < comment_friends_index; i++)
+            //    {
+            //        CommentInfo comment_info = new CommentInfo();
+            //        node = node.NextSibling;//评论的属性节点
+
+            //        long comment_ts = long.Parse(node.SelectSingleNode("key[. = 'createTime']").NextSibling.InnerText);
+            //        comment_info.comment_time = TStoLocalTime(comment_ts);
+            //        node = node.NextSibling;//评论人微信号
+
+            //        string wxid = node.InnerText;
+            //        comment_info.comment_user_id = wxid;
+            //        node = node.NextSibling;//评论人昵称
+
+
+            //        string nick_name = node.InnerText;
+            //        comment_info.comment_user_name = nick_name;
+            //        node = node.NextSibling;//评论内容
+
+            //        string comment = node.InnerText;
+            //        comment_info.comment_cotent = comment;
+            //        node = node.NextSibling;//某种奇怪的ID，会以32递增
+
+            //        if (node.NextSibling.Name.Equals("string"))
+            //        {
+            //            node = node.NextSibling;//回复对象
+            //            string reply = node.InnerText;
+            //            comment_info.comment_reply = reply;
+            //            comment_info.type = 0;
+            //        }
+            //        else
+            //        {
+            //            comment_info.type = 1;
+            //        }
+            //        info.comment_list.Add(comment_info);
+
+            //    }
+            //}
             return info;
         }
 
@@ -227,12 +309,24 @@ namespace WeChatMomentExport.Utils
         /// </summary>
         /// <param name="txt"></param>
         /// <returns></returns>
-        static string ReplaceHexadecimalSymbols(string txt)
+        private static string ReplaceHexadecimalSymbols(string txt)
         {
             //12655080931128840365
             return txt;
             string r = "[\x00-\x08\x0B\x0C\x0E-\x1F\x26]";
             return Regex.Replace(txt, r, "", RegexOptions.Compiled);
+        }
+
+        /// <summary>
+        /// 时间戳转本地时间
+        /// </summary>
+        /// <param name="TS"></param>
+        /// <returns></returns>
+        private static DateTime TStoLocalTime(long TS)
+        {
+            DateTime converted = new DateTime(1970, 1, 1, 0, 0, 0, 0);
+            DateTime newDateTime = converted.AddSeconds(TS);
+            return newDateTime.ToLocalTime();
         }
     }
 }

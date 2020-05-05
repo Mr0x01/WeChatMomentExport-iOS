@@ -1,6 +1,9 @@
 # 完全重构的iOS微信朋友圈导出
 WeChatMomentExport-iOS是用C#编写的朋友圈导出工具
 **(仅适用于iOS的朋友圈数据库)**。
+# 效果
+![Report.txt](https://raw.githubusercontent.com/Mr0x01/WeChatMomentExport-iOS/master/Export1.png "Report.txt")
+
 
 # 使用说明
 ## 从手机导出微信数据库
@@ -47,8 +50,7 @@ View\static\script\data.js  | 用于展示的朋友圈数据
 2. 有的评论没有评论人昵称，但这个不是解析的问题，而是plist里确实没有。此时用评论人id进行了替代。
 3. 有的评论没有评论人昵称和评论人id，同样的，plist里确实没有。此时此条评论丢弃，因为没法确定哪个是评论本体。
 4. 有的朋友圈明明是发了一张图片，但是plist里的类型却是小视频，所以解析出来的内容也会有误。
-# 效果
-![Report.txt](https://raw.githubusercontent.com/Mr0x01/WeChatMomentExport-iOS/master/Export1.png "Report.txt")
+
 
 # 碰碰运气
 

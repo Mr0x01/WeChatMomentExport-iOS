@@ -12,5 +12,6 @@ namespace WeChatMomentExport.Model
         public DateTime create_time { get; set; }//朋友圈发送时间
         public string content { get; set; }//朋友圈文字内容
         public Dictionary<string, string> liked_friends = new Dictionary<string, string>();//喜欢的朋友
+        public List<CommentInfo> comment_list = new List<CommentInfo>();//评论列表
     }
 }
