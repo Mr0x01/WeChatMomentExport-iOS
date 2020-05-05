@@ -65,7 +65,7 @@ namespace WeChatMomentExport.Core
                 foreach (Uri img in momentInfo.momentImgs)
                 {
                     guid = Guid.NewGuid().ToString();
-                    localFileName = $"View\\LocalFile\\{guid}.jpg";
+                    localFileName = $"LocalFile\\{guid}.jpg";
                     LogUtil.Log($"下载{img}");
                     webClient.DownloadFile(img, localFileName);
                     momentInfo.momentImgsLocal.Add(localFileName);
@@ -74,7 +74,7 @@ namespace WeChatMomentExport.Core
             if (momentInfo.shortVideoUrl != null)
             {
                 guid = Guid.NewGuid().ToString();
-                localFileName = $"View\\LocalFile\\{guid}.mp4";
+                localFileName = $"LocalFile\\{guid}.mp4";
                 LogUtil.Log($"下载{momentInfo.shortVideoUrl}");
                 webClient.DownloadFile(momentInfo.shortVideoUrl, localFileName);
                 momentInfo.shortVideoUrlLocal = localFileName;
@@ -82,7 +82,7 @@ namespace WeChatMomentExport.Core
             if (momentInfo.sharedItem != null)
             {
                 guid = Guid.NewGuid().ToString();
-                localFileName = $"View\\LocalFile\\{guid}.mp4";
+                localFileName = $"LocalFile\\{guid}.mp4";
                 LogUtil.Log($"下载{momentInfo.sharedItem.sharedUrl}");
                 webClient.DownloadFile(momentInfo.sharedItem.sharedUrl, localFileName);
                 momentInfo.sharedItem.sharedFileLocal = localFileName;
