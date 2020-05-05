@@ -2,7 +2,7 @@
 WeChatMomentExport-iOS是用C#编写的朋友圈导出工具
 **(仅适用于iOS的朋友圈数据库)**。
 # 效果
-![Report.txt](https://raw.githubusercontent.com/Mr0x01/WeChatMomentExport-iOS/master/Export1.png "Report.txt")
+<img src="https://raw.githubusercontent.com/Mr0x01/WeChatMomentExport-iOS/master/Export1.png" height="1500"/>
 
 
 # 使用说明
@@ -45,6 +45,11 @@ Plist\ | 存放自己发布过的所有朋友圈(wc005_008.db里导出的原始�
 Json\  | 存放所有解析好的朋友圈JSON文件
 View\LocalFile\  | 存放下载到本地的朋友圈中的文件(图片，视频之类的)
 View\static\script\data.js  | 用于展示的朋友圈数据
+## 导出完成
+到处完成后，打开Debug\View\Index.html就能看到自己的朋友圈时间线。
+
+由于本人前端技术非常的凑合，所以并没有弄出特别华丽的展示效果，有兴趣的朋友可以PullRequest。
+
 # 已知问题
 1. 除了微视分享外，其他的分享内容没有做兼容，不能正确导出分享的内容。
 2. 有的评论没有评论人昵称，但这个不是解析的问题，而是plist里确实没有。此时用评论人id进行了替代。
