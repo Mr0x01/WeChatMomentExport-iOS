@@ -14,7 +14,7 @@ namespace WeChatMomentExport
     {
         static void Main(string[] args)
         {
-            MomentExporterFacade exporterFacade = new MomentExporterFacade("91ec3e7cf49aae1ce8a6437dc58aa759", true);
+            MomentExporterFacade exporterFacade = new MomentExporterFacade("49baa62c85d746efdb46eb2ff92a446b", true);
             exporterFacade.Start();
         }
     }

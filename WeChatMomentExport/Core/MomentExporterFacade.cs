@@ -51,7 +51,7 @@ namespace WeChatMomentExport.Core
             }
             string bigOneJson = JsonConvert.SerializeObject(bigOne);
 
-            bigOneJson = "var moment_data = \"" + HttpUtility.UrlEncode(bigOneJson) + "\"";
+            bigOneJson = "var moment_data = " + bigOneJson;
             File.WriteAllText($"View\\static\\script\\data.js", bigOneJson, Encoding.UTF8);
         }
 
