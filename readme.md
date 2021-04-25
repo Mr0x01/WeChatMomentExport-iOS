@@ -62,13 +62,3 @@ DB\WCDB_Contact.sqlite|通讯录数据库
 Img|聊天图片缓存
 Video|聊天小视频缓存
 wc\wc005_008.db|朋友圈缓存
-
-
-# 碰碰运气
-
-如果这个项目帮到了你，或者感觉有点儿意思，可以的话还请支持一下。
-<div>
-<img src="https://raw.githubusercontent.com/Mr0x01/MoneyCode/master/a.jpg" height="300"/>
-&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
-<img src="https://raw.githubusercontent.com/Mr0x01/MoneyCode/master/w.jpg"height="300" />
-</div>
